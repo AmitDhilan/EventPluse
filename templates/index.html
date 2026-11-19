@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventPulse — Campus Event & Club Management Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-inner">
+      <div class="brand">EventPulse</div>
+      <div class="nav-actions">
+        <a href="/api/export.csv" class="btn btn-outline link-btn">Export Registrations CSV</a>
+        <button id="themeBtn" class="btn btn-outline" type="button">Light Mode</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Campus Event & Club Management Portal</h1>
+      <p>Manage clubs, publish events with seat limits, register students, track attendance, and export reports.</p>
+    </section>
+
+    <section class="stats-grid">
+      <div class="card">
+        <div class="stat-label">Total Events</div>
+        <div id="statEvents" class="stat-val">0</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Open Events</div>
+        <div id="statOpen" class="stat-val c-green">0</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Total Registrations</div>
+        <div id="statRegs" class="stat-val c-blue">0</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Checked-In</div>
+        <div id="statCheckedIn" class="stat-val c-amber">0</div>
+      </div>
+    </section>
+
+    <section class="layout-grid">
+      <!-- Left Forms Column -->
+      <div class="stack">
+        <div class="card">
+          <h3>Register Student for Event</h3>
+          <form id="regForm" class="form">
+            <div class="field">
+              <label for="regEvent">Select Event *</label>
+              <select id="regEvent" required></select>
+            </div>
+            <div class="field">
+              <label for="studentName">Student Name *</label>
+              <input id="studentName" type="text" placeholder="e.g. Aarav Verma" required />
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="rollNo">Roll No *</label>
+                <input id="rollNo" type="text" placeholder="e.g. CS2310" required />
+              </div>
+              <div class="field">
+                <label for="studentEmail">Email *</label>
+                <input id="studentEmail" type="email" placeholder="aarav@example.com" required />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Confirm Registration</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Create New Event</h3>
+          <form id="eventForm" class="form">
+            <div class="field">
+              <label for="eventClub">Organizing Club *</label>
+              <select id="eventClub" required></select>
+            </div>
+            <div class="field">
+              <label for="eventTitle">Event Title *</label>
+              <input id="eventTitle" type="text" placeholder="e.g. Cloud & Docker Seminar" required />
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="eventVenue">Venue *</label>
+                <input id="eventVenue" type="text" placeholder="Hall A" required />
+              </div>
+              <div class="field">
+                <label for="eventDate">Date *</label>
+                <input id="eventDate" type="date" required />
+              </div>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="eventCapacity">Seat Capacity *</label>
+                <input id="eventCapacity" type="number" min="1" value="50" required />
+              </div>
+              <div class="field">
+                <label for="eventStatus">Status</label>
+                <select id="eventStatus">
+                  <option value="Open">Open</option>
+                  <option value="Closed">Closed</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="eventDesc">Description</label>
+              <input id="eventDesc" type="text" placeholder="Short event summary..." />
+            </div>
+            <button type="submit" class="btn btn-secondary">Publish Event</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h3>Add Club</h3>
+          <form id="clubForm" class="form">
+            <div class="field">
+              <label for="clubName">Club Name *</label>
+              <input id="clubName" type="text" placeholder="e.g. Robotics & AI Society" required />
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="clubCoord">Coordinator *</label>
+                <input id="clubCoord" type="text" placeholder="Prof. S. Rao" required />
+              </div>
+              <div class="field">
+                <label for="clubCat">Category</label>
+                <input id="clubCat" type="text" placeholder="Technical" />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-outline full-btn">Add Club</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Events & Registrations Column -->
+      <div class="stack">
+        <div class="card">
+          <h3>Upcoming & Active Events</h3>
+          <div class="toolbar">
+            <input id="searchInput" type="text" placeholder="Search title, club, or venue..." />
+            <select id="filterClub">
+              <option value="All">All Clubs</option>
+            </select>
+            <select id="filterStatus">
+              <option value="All">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="Closed">Closed</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div id="eventsContainer" class="list-box">
+            <div class="empty">Loading events...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="reg-header">
+            <h3>Student Registrations & Attendance</h3>
+            <select id="regFilterEvent" class="small-select">
+              <option value="">All Events</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Roll No</th>
+                  <th>Event</th>
+                  <th>Attendance</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="regTableBody">
+                <tr><td colspan="5" class="empty">Loading registrations...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
